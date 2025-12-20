@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from transformers import pipeline
+
 app = Flask(_name_)
 
 @app.route('/')
 def index():
     return "API de IA rodando! Use as rotas /resumir, /traduzir, /gerarmensagem, etc."
-# Pipelines/modelos
+[10:16, 12/20/2025] Eita Mentora Virtual: # Pipelines/modelos
 resumidor = pipeline('summarization', model='csebuetnlp/mT5_multilingual_XLSum')
 tradutor_en_pt = pipeline('translation_en_to_pt', model='Helsinki-NLP/opus-mt-en-pt')
 tradutor_pt_en = pipeline('translation_pt_to_en', model='Helsinki-NLP/opus-mt-pt-en')
