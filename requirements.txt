@@ -1,0 +1,8 @@
+Flask
+gunicorn
+python-dotenv
+nltk
+reportlab
+transformers
+torch
+
