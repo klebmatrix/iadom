@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from transformers import pipeline
+app = Flask(_name_)
 
 @app.route('/')
 def index():
@@ -15,7 +16,6 @@ resposta_qa = pipeline('question-answering')
 corretor = pipeline('fill-mask', model='bert-base-uncased')
 palavras_chave = pipeline('ner', grouped_entities=True)
 detector = pipeline('text-classification', model='papluca/xlm-roberta-base-language-detection')
-
 @app.route('/resumir', methods=['POST'])
 def resumir():
     data = request.get_json()
