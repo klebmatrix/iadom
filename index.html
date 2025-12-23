@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>IA Multifunção</title>
+<meta charset="UTF-8">
+<title>IA Multifunção</title>
 </head>
 <body>
 
-<textarea id="texto" rows="6" cols="60"></textarea><br><br>
-<a href="https://cromosvirtual.com" class="muted-btn" style="text-decoration:none; display:flex; align-items:center; height:38px;">Voltar</a>
+<h2>IA Multifunção</h2>
+
+<textarea id="texto" rows="6" cols="60" placeholder="Digite o texto..."></textarea><br><br>
+
 <button onclick="acao('/resumir')">Resumir</button>
 <button onclick="acao('/traduzir_pt_en')">PT → EN</button>
 <button onclick="acao('/traduzir_en_pt')">EN → PT</button>
@@ -20,13 +22,29 @@ const API = "https://iadom.onrender.com";
 
 async function acao(rota) {
   const texto = document.getElementById("texto").value;
-  const res = await fetch(API + rota, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ texto })
-  });
-  const data = await res.json();
-  document.getElementById("resultado").innerText = data.resultado;
+  const resultado = document.getElementById("resultado");
+
+  resultado.innerText = "Processando...";
+
+  try {
+    const res = await fetch(API + rota, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texto })
+    });
+
+    if (!res.ok) {
+      resultado.innerText = "Erro HTTP: " + res.status;
+      return;
+    }
+
+    const data = await res.json();
+    resultado.innerText = data.resultado;
+
+  } catch (e) {
+    resultado.innerText = "Erro ao conectar com o servidor";
+    console.error(e);
+  }
 }
 </script>
 
