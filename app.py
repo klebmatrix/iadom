@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, jsonify
-from transformers import pipeline
+from flask import Flask
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # MODELOS (carregam uma vez)
 resumidor = pipeline("summarization", model="csebuetnlp/mT5_multilingual_XLSum")
