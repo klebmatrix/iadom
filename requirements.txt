@@ -1,9 +1,6 @@
+flask
 flask-cors
 gunicorn
-python-dotenv
-nltk
-reportlab
-transformers
 torch
-
-
+transformers
+sentencepiece

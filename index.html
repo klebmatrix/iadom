@@ -3,70 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>IA Multifunção</title>
-  <style>
-    body { font-family: Arial; max-width: 800px; margin: auto; }
-    textarea { width: 100%; height: 140px; }
-    button { margin: 5px; padding: 10px; cursor: pointer; }
-    #resultado { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
-  </style>
 </head>
 <body>
 
-<h2>Texto</h2>
-<textarea id="texto" placeholder="Digite ou cole o texto aqui"></textarea>
+<textarea id="texto" rows="6" cols="60"></textarea><br><br>
+<a href="https://cromosvirtual.com" class="muted-btn" style="text-decoration:none; display:flex; align-items:center; height:38px;">Voltar</a>
+<button onclick="acao('/resumir')">Resumir</button>
+<button onclick="acao('/traduzir_pt_en')">PT → EN</button>
+<button onclick="acao('/traduzir_en_pt')">EN → PT</button>
+<button onclick="acao('/sentimento')">Sentimento</button>
 
-<br><br>
- <a href="https://cromosvirtual.com" class="muted-btn" style="text-decoration:none; display:flex; align-items:center; height:38px;">Voltar</a>
-    <button id="zoomToggle" class="muted-btn" style="font-size: 18px;">🔍</button>
-<button onclick="resumir()">🧠 Resumir</button>
-<button onclick="ptEn()">🇧🇷 ➜ 🇺🇸 Traduzir PT → EN</button>
-<button onclick="enPt()">🇺🇸 ➜ 🇧🇷 Traduzir EN → PT</button>
-<button onclick="sentimento()">😊 Analisar Sentimento</button>
-
-<div id="resultado">Resultado aparecerá aqui...</div>
+<pre id="resultado"></pre>
 
 <script>
-const API = "https://SEU-BACKEND.onrender.com";
+const API = "https://iadom.onrender.com";
 
-async function resumir() {
-  await chamarAPI("/resumir");
-}
-
-async function ptEn() {
-  await chamarAPI("/traduzir_pt_en");
-}
-
-async function enPt() {
-  await chamarAPI("/traduzir_en_pt");
-}
-
-async function sentimento() {
-  await chamarAPI("/sentimento");
-}
-
-async function chamarAPI(rota) {
+async function acao(rota) {
   const texto = document.getElementById("texto").value;
-  if (!texto) {
-    alert("Digite um texto primeiro");
-    return;
-  }
-
-  document.getElementById("resultado").innerText = "Processando...";
-
-  try {
-    const response = await fetch(API + rota, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texto })
-    });
-
-    const data = await response.json();
-    document.getElementById("resultado").innerText = data.resultado;
-
-  } catch (err) {
-    document.getElementById("resultado").innerText =
-      "Erro ao conectar com o servidor";
-  }
+  const res = await fetch(API + rota, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ texto })
+  });
+  const data = await res.json();
+  document.getElementById("resultado").innerText = data.resultado;
 }
 </script>
 

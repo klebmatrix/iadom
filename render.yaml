@@ -1,14 +1,7 @@
 services:
   - type: web
-    name: sysdigital
+    name: iadom-backend
     env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      mkdir -p src/templates src/static
-      cp -r src/templates src/static . || true
-    startCommand: gunicorn src.app:app
-    envVars:
-      - key: FLASK_ENV
-        value: production
-      - key: PYTHON_VERSION
-        value: 3.13.0
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:10000
