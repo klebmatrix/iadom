@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>IA Multifunção</title>
+</head>
+<body>
+
+<h2>Resumo de Texto</h2>
+
+<textarea id="texto" rows="6" cols="60"></textarea><br><br>
+
+<button onclick="resumir()">Resumir</button>
+
+<p><strong>Resultado:</strong></p>
+<div id="resultado"></div>
+
+<script>
+async function resumir() {
+  const texto = document.getElementById("texto").value;
+
+  const response = await fetch(
+    "https://SEU-BACKEND.onrender.com/resumir",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ texto })
+    }
+  );
+
+  const data = await response.json();
+  document.getElementById("resultado").innerText = data.resultado;
+}
+</script>
+
+</body>
+</html>
