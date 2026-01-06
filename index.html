@@ -2,245 +2,225 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Batalha Naval Matemática: Operation Neon</title>
+    <title>Batalha Naval Matemática Interativa</title>
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-red: #ff003c;
-            --deep-space: #0a0e14;
-            --grid-bg: #16212a;
+            --agua: #e1f5fe;
+            --mar-profundo: #0288d1;
+            --acerto: #ef5350;
+            --texto: #2c3e50;
         }
 
         body {
-            background: var(--deep-space);
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--texto);
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
             margin: 0;
-            overflow-x: hidden;
+            padding: 20px;
         }
 
-        .hud {
-            margin-top: 20px;
-            padding: 15px;
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue);
-            background: rgba(0, 243, 255, 0.1);
-            border-radius: 8px;
-            min-width: 300px;
+        .painel-status {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+            border-top: 5px solid var(--mar-profundo);
         }
 
-        .grid {
+        .dado { text-align: center; }
+        .dado span { display: block; font-size: 24px; font-weight: bold; color: var(--mar-profundo); }
+
+        .grade {
             display: grid;
-            grid-template-columns: repeat(6, 65px);
-            gap: 8px;
-            margin: 30px;
-            background: rgba(0, 243, 255, 0.05);
+            grid-template-columns: repeat(6, 70px);
+            gap: 10px;
+            background: white;
             padding: 15px;
             border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        .cell {
-            width: 65px;
-            height: 65px;
-            background: var(--grid-bg);
-            border: 1px solid #1e3a47;
+        .celula {
+            width: 70px;
+            height: 70px;
+            background-color: var(--agua);
+            border: 2px solid transparent;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 600;
             transition: all 0.2s;
-            position: relative;
         }
 
-        .cell:hover {
-            border-color: var(--neon-blue);
-            box-shadow: inset 0 0 10px var(--neon-blue);
-            transform: scale(1.05);
-            z-index: 2;
+        .celula:hover {
+            transform: translateY(-3px);
+            border-color: var(--mar-profundo);
+            background-color: #b3e5fc;
         }
 
-        .cell.hit {
-            background: var(--neon-red) !important;
-            box-shadow: 0 0 20px var(--neon-red);
-            animation: shake 0.5s;
-        }
+        .celula.acertou { background-color: var(--acerto); color: white; border-color: #b71c1c; }
+        .celula.errou { background-color: #cfd8dc; color: #78909c; cursor: default; }
 
-        .cell.miss {
-            background: #2c3e50;
-            opacity: 0.5;
-        }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            50% { transform: translate(-1px, 2px) rotate(1deg); }
-            100% { transform: translate(1px, 1px) rotate(0deg); }
-        }
-
-        #modal {
+        /* Modal de Pergunta */
+        #janela-pergunta {
             display: none;
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: #1a1a1a;
-            padding: 30px;
-            border: 3px solid var(--neon-blue);
-            z-index: 100;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.3);
             text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            z-index: 1000;
         }
 
+        #janela-pergunta h2 { margin-top: 0; color: var(--mar-profundo); }
         input {
-            background: black;
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            padding: 10px;
-            font-size: 20px;
-            width: 80px;
+            padding: 15px;
+            font-size: 24px;
+            width: 100px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
             text-align: center;
-            outline: none;
+            margin: 20px 0;
         }
 
         button {
-            background: var(--neon-blue);
+            background: var(--mar-profundo);
+            color: white;
             border: none;
-            padding: 10px 20px;
-            color: black;
+            padding: 15px 30px;
+            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            font-size: 16px;
         }
 
-        .stats { font-size: 1.2rem; display: flex; justify-content: space-around; }
+        button:hover { background: #01579b; }
+
+        .msg-sucesso { color: #2e7d32; font-weight: bold; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="hud">
-        <div class="stats">
-            <span>RADAR: ATIVO</span>
-            <span id="score">SCORE: 000</span>
-            <span id="health">HULL: 100%</span>
-        </div>
+    <h1>Batalha Naval Matemática</h1>
+    <p>Clique nos quadrados azuis e resolva as contas para encontrar a frota!</p>
+
+    <div class="painel-status">
+        <div class="dado">PONTOS<span id="pontos">0</span></div>
+        <div class="dado">CHANCES<span id="vidas">5</span></div>
+        <div class="dado">NAVIOS<span id="restantes">6</span></div>
     </div>
 
-    <div class="grid" id="board"></div>
+    <div class="grade" id="tabuleiro"></div>
 
-    <div id="modal">
-        <h2 id="modal-title">INCOMING TARGET</h2>
-        <p id="question" style="font-size: 24px; color: var(--neon-blue);"></p>
-        <input type="number" id="answer-input" placeholder="?">
+    <div id="janela-pergunta">
+        <h2>ALVO DETECTADO!</h2>
+        <p>Resolva para disparar:</p>
+        <div id="conta" style="font-size: 32px; font-weight: bold;"></div>
+        <input type="number" id="resposta-usuario" placeholder="?">
         <br>
-        <button onclick="submitAnswer()">FIRE!</button>
+        <button onclick="verificarTiro()">ATIRAR!</button>
+        <div id="feedback" class="msg-sucesso">Correto!</div>
     </div>
 
     <script>
-        const board = document.getElementById('board');
-        const modal = document.getElementById('modal');
-        const answerInput = document.getElementById('answer-input');
+        const tabuleiro = document.getElementById('tabuleiro');
+        const modal = document.getElementById('janela-pergunta');
+        const input = document.getElementById('resposta-usuario');
         
-        let score = 0;
-        let health = 100;
-        let currentTarget = null;
-        const shipsCount = 8;
-        let foundShips = 0;
+        let pontos = 0;
+        let vidas = 5;
+        let naviosRestantes = 6;
+        let indiceAtual = null;
 
-        // Sons básicos usando Web Audio API
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(freq, type, duration) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        const data = Array.from({length: 36}, (_, i) => {
-            const a = Math.floor(Math.random() * 9) + 1;
-            const b = Math.floor(Math.random() * 9) + 1;
+        // Gerar dados do jogo (6x6 = 36 casas)
+        const dados = Array.from({length: 36}, () => {
+            const n1 = Math.floor(Math.random() * 9) + 1;
+            const n2 = Math.floor(Math.random() * 9) + 1;
             return {
-                q: `${a} x ${b}`,
-                ans: a * b,
-                hasShip: Math.random() < 0.25,
-                status: 'hidden'
+                pergunta: `${n1} x ${n2}`,
+                resultado: n1 * n2,
+                temNavio: Math.random() < 0.2, // 20% de chance de ter navio
+                estado: 'mar'
             };
         });
 
-        function createBoard() {
-            board.innerHTML = '';
-            data.forEach((item, i) => {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.innerText = '??';
-                cell.onclick = () => openTarget(i);
-                board.appendChild(cell);
+        function desenharTabuleiro() {
+            tabuleiro.innerHTML = '';
+            dados.forEach((casa, i) => {
+                const div = document.createElement('div');
+                div.className = 'celula';
+                div.innerText = '≋';
+                div.onclick = () => abrirModal(i);
+                if(casa.estado === 'acerto') { div.classList.add('acertou'); div.innerText = '🚢'; }
+                if(casa.estado === 'erro') { div.classList.add('errou'); div.innerText = 'X'; }
+                tabuleiro.appendChild(div);
             });
         }
 
-        function openTarget(i) {
-            if (data[i].status !== 'hidden' || health <= 0) return;
-            currentTarget = i;
-            document.getElementById('question').innerText = data[i].q;
+        function abrirModal(i) {
+            if (dados[i].estado !== 'mar' || vidas <= 0) return;
+            indiceAtual = i;
+            document.getElementById('conta').innerText = dados[i].pergunta;
             modal.style.display = 'block';
-            answerInput.focus();
-            playSound(440, 'sine', 0.1);
+            input.value = '';
+            input.focus();
         }
 
-        function submitAnswer() {
-            const val = parseInt(answerInput.value);
-            const target = data[currentTarget];
-            const cell = board.children[currentTarget];
-
-            if (val === target.ans) {
-                if (target.hasShip) {
-                    target.status = 'hit';
-                    cell.classList.add('hit');
-                    cell.innerText = '💥';
-                    score += 100;
-                    foundShips++;
-                    playSound(150, 'sawtooth', 0.5);
+        function verificarTiro() {
+            const resp = parseInt(input.value);
+            const alvo = dados[indiceAtual];
+            
+            if (resp === alvo.resultado) {
+                if (alvo.temNavio) {
+                    alvo.estado = 'acerto';
+                    pontos += 100;
+                    naviosRestantes--;
+                    alert("💥 BUM! Você atingiu um navio!");
                 } else {
-                    target.status = 'miss';
-                    cell.classList.add('miss');
-                    cell.innerText = '🌊';
-                    score += 10;
-                    playSound(200, 'sine', 0.2);
+                    alvo.estado = 'erro';
+                    pontos += 10;
+                    alert("💦 ÁGUA! Não tinha nada aqui.");
                 }
             } else {
-                health -= 25;
-                playSound(80, 'square', 0.4);
-                alert("SYSTEM DAMAGE! Resposta errada.");
+                vidas--;
+                alert(`❌ ERROU! O resultado era ${alvo.resultado}. Você perdeu uma chance.`);
             }
 
             modal.style.display = 'none';
-            answerInput.value = '';
-            updateHUD();
-            checkGameOver();
+            atualizarStatus();
+            desenharTabuleiro();
+            checarFimDeJogo();
         }
 
-        function updateHUD() {
-            document.getElementById('score').innerText = `SCORE: ${score.toString().padStart(3, '0')}`;
-            document.getElementById('health').innerText = `HULL: ${health}%`;
+        function atualizarStatus() {
+            document.getElementById('pontos').innerText = pontos;
+            document.getElementById('vidas').innerText = vidas;
+            document.getElementById('restantes').innerText = naviosRestantes;
         }
 
-        function checkGameOver() {
-            if (health <= 0) alert("MISSION FAILED. Seu navio foi destruído!");
-            if (foundShips >= 8) alert("MISSION ACCOMPLISHED! Oceano limpo.");
+        function checarFimDeJogo() {
+            if (naviosRestantes === 0) {
+                alert("🏆 VITÓRIA! Você limpou o oceano!");
+                location.reload();
+            } else if (vidas <= 0) {
+                alert("🚩 FIM DE JOGO! Suas chances acabaram.");
+                location.reload();
+            }
         }
 
-        createBoard();
+        desenharTabuleiro();
     </script>
 </body>
 </html>
