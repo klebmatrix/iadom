@@ -6,16 +6,16 @@
     <title>Batalha Naval Matemática</title>
     <style>
         :root {
-            --azul: #0288d1;
+            --azul-mar: #2196f3;
+            --azul-claro: #e3f2fd;
+            --vermelho: #f44336;
             --verde: #4caf50;
             --laranja: #ff9800;
-            --vermelho: #f44336;
-            --fundo: #f0f4f7;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: var(--fundo);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f4f8;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -24,76 +24,79 @@
             min-height: 100vh;
         }
 
-        /* --- TELAS DO JOGO --- */
-        .tela { display: none; width: 90%; max-width: 500px; text-align: center; }
+        /* --- TELAS --- */
+        .tela { display: none; width: 100%; max-width: 500px; text-align: center; }
         .ativa { display: block; }
 
-        /* --- MENU INICIAL --- */
-        .caixa {
+        .caixa-menu {
             background: white;
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        h1 { color: var(--azul); margin-bottom: 30px; }
-
         .btn-nivel {
             display: block;
             width: 100%;
-            padding: 20px;
-            margin: 15px 0;
+            padding: 18px;
+            margin: 12px 0;
             border: none;
             border-radius: 12px;
             font-size: 18px;
             font-weight: bold;
             color: white;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: 0.2s;
         }
 
-        .btn-nivel:hover { transform: scale(1.03); }
-        .n-iniciante { background-color: var(--verde); }
-        .n-facil { background-color: var(--azul); }
-        .n-medio { background-color: var(--laranja); }
+        .btn-nivel:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .n-1 { background: var(--verde); }
+        .n-2 { background: var(--azul-mar); }
+        .n-3 { background: var(--laranja); }
 
-        /* --- GRADE DO JOGO --- */
-        .status {
+        /* --- JOGO --- */
+        .status-painel {
             display: flex;
             justify-content: space-around;
             background: white;
             padding: 15px;
-            border-radius: 50px;
+            border-radius: 15px;
             margin-bottom: 20px;
-            font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-weight: bold;
         }
 
-        #tabuleiro {
+        .grade {
             display: grid;
             gap: 10px;
             background: white;
             padding: 20px;
             border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             margin: 0 auto;
         }
 
         .casa {
             width: 60px;
             height: 60px;
-            background: #e1f5fe;
+            background: var(--azul-claro);
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            border: 2px solid transparent;
+            transition: 0.2s;
         }
 
-        .casa.acerto { background: var(--vermelho); color: white; }
-        .casa.erro { background: #cfd8dc; color: #78909c; }
+        .casa:hover { border-color: var(--azul-mar); background: #bbdefb; }
+        
+        /* ÍCONES SVG */
+        .icon { width: 40px; height: 40px; }
+        .casa.acerto { background: #ffebee; border-color: var(--vermelho); }
+        .casa.erro { background: #eceff1; }
 
-        /* --- MODAL DE CONTA --- */
+        /* --- MODAL --- */
         .overlay {
             display: none;
             position: fixed;
@@ -106,127 +109,129 @@
             background: white;
             padding: 30px;
             border-radius: 20px;
-            width: 280px;
+            width: 300px;
             text-align: center;
         }
 
-        .pergunta { font-size: 40px; font-weight: bold; margin: 20px 0; color: var(--azul); }
-        input { width: 80%; padding: 10px; font-size: 24px; text-align: center; border: 2px solid #ddd; border-radius: 10px; }
-        .btn-atirar { width: 100%; padding: 15px; background: var(--azul); color: white; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer; font-weight: bold; }
+        .conta { font-size: 40px; font-weight: bold; margin: 20px 0; color: var(--azul-mar); }
+        input { width: 100%; padding: 12px; font-size: 24px; text-align: center; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn-fogo { width: 100%; padding: 15px; background: var(--azul-mar); color: white; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="tela-menu" class="tela ativa">
-        <div class="caixa">
+        <div class="caixa-menu">
             <h1>⚓ Batalha Naval</h1>
-            <p>Selecione a Dificuldade:</p>
-            <button class="btn-nivel n-iniciante" onclick="iniciar(1)">INICIANTE (Soma)</button>
-            <button class="btn-nivel n-facil" onclick="iniciar(2)">FÁCIL (Subtração)</button>
-            <button class="btn-nivel n-medio" onclick="iniciar(3)">MÉDIO (Multiplicação)</button>
+            <p>Escolha o nível de matemática:</p>
+            <button class="btn-nivel n-1" onclick="iniciar(1)">INICIANTE (Soma)</button>
+            <button class="btn-nivel n-2" onclick="iniciar(2)">FÁCIL (Subtração)</button>
+            <button class="btn-nivel n-3" onclick="iniciar(3)">MÉDIO (Multiplicação)</button>
         </div>
     </div>
 
     <div id="tela-jogo" class="tela">
-        <div class="status">
-            <span>Vidas: <span id="vidas">5</span></span>
-            <span>Navios: <span id="navios">0</span></span>
+        <div class="status-painel">
+            <span>Vidas: <span id="vidas" style="color:var(--vermelho)">5</span></span>
+            <span>Navios: <span id="navios" style="color:var(--azul-mar)">0</span></span>
         </div>
-        <div id="tabuleiro"></div>
-        <button style="margin-top: 20px; background: none; border: none; color: #666; cursor: pointer;" onclick="location.reload()">↺ Voltar ao Menu</button>
+        <div id="grade" class="grade"></div>
+        <button style="margin-top: 20px; border:none; background:none; color:#999; cursor:pointer;" onclick="location.reload()">↺ Voltar ao Menu</button>
     </div>
 
     <div id="overlay" class="overlay">
         <div class="modal">
             <h3>Quanto é?</h3>
-            <div id="pergunta" class="pergunta"></div>
+            <div id="conta" class="conta"></div>
             <input type="number" id="resposta" placeholder="?">
-            <button class="btn-atirar" onclick="checarResposta()">ATIRAR!</button>
+            <button class="btn-fogo" onclick="confirmarTiro()">ATIRAR!</button>
         </div>
     </div>
 
     <script>
-        let config = { vidas: 5, navios: 0, nivel: 1 };
+        // Ícones em SVG para garantir que apareçam
+        const iconAgua = `<svg class="icon" viewBox="0 0 24 24"><path fill="#90caf9" d="M2,15L5,12L8,15L11,12L14,15L17,12L20,15L23,12V22H2V15Z"/></svg>`;
+        const iconNavio = `<svg class="icon" viewBox="0 0 24 24"><path fill="#d32f2f" d="M20,21V19L17,17V11H15V17L13,17V13H11V17L9,17V15H7V17L4,19V21H20Z"/></svg>`;
+        const iconErro = `<svg class="icon" viewBox="0 0 24 24"><path fill="#b0bec5" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>`;
+
+        let game = { vidas: 5, navios: 0, nivel: 1 };
         let mapa = [];
         let alvoIndex = null;
 
-        function iniciar(nivel) {
-            config.nivel = nivel;
+        function iniciar(n) {
+            game.nivel = n;
             document.getElementById('tela-menu').classList.remove('ativa');
             document.getElementById('tela-jogo').classList.add('ativa');
 
-            const tab = document.getElementById('tabuleiro');
-            let tamanho = nivel === 3 ? 6 : 5; // Tabuleiro maior no médio
-            tab.style.gridTemplateColumns = `repeat(${tamanho}, 60px)`;
+            let tam = n === 3 ? 6 : 5;
+            game.navios = n + 3;
+            document.getElementById('navios').innerText = game.navios;
+            
+            const grade = document.getElementById('grade');
+            grade.style.gridTemplateColumns = `repeat(${tam}, 60px)`;
 
-            config.navios = nivel + 3; // Nível 1=4 navios, 2=5, 3=6
-            document.getElementById('navios').innerText = config.navios;
-
-            for (let i = 0; i < tamanho * tamanho; i++) {
-                mapa.push(gerarConta(nivel));
+            for(let i=0; i<tam*tam; i++) {
+                mapa.push(gerarQuestao(n));
             }
-            renderizar();
+            render();
         }
 
-        function gerarConta(nivel) {
+        function gerarQuestao(n) {
             let a = Math.floor(Math.random() * 10) + 1;
             let b = Math.floor(Math.random() * 10) + 1;
-            let pergunta, resposta;
-
-            if(nivel === 1) { pergunta = `${a} + ${b}`; resposta = a + b; }
-            else if(nivel === 2) { 
-                let maior = Math.max(a, b);
-                let menor = Math.min(a, b);
-                pergunta = `${maior} - ${menor}`; resposta = maior - menor; 
+            if(n === 1) return { q: `${a} + ${b}`, r: a+b, ship: Math.random() < 0.3, status: 'mar' };
+            if(n === 2) {
+                let m = Math.max(a, b), s = Math.min(a, b);
+                return { q: `${m} - ${s}`, r: m-s, ship: Math.random() < 0.3, status: 'mar' };
             }
-            else { pergunta = `${a} x ${b}`; resposta = a * b; }
-
-            return { pergunta, resposta, temNavio: Math.random() < 0.3, status: 'mar' };
+            return { q: `${a} x ${b}`, r: a*b, ship: Math.random() < 0.3, status: 'mar' };
         }
 
-        function renderizar() {
-            const tab = document.getElementById('tabuleiro');
-            tab.innerHTML = '';
-            mapa.forEach((casa, i) => {
-                const div = document.createElement('div');
-                div.className = 'casa ' + casa.status;
-                div.innerHTML = casa.status === 'acerto' ? '🚢' : (casa.status === 'erro' ? '✕' : '≋');
-                div.onclick = () => {
-                    if(casa.status !== 'mar' || config.vidas <= 0) return;
+        function render() {
+            const grade = document.getElementById('grade');
+            grade.innerHTML = '';
+            mapa.forEach((c, i) => {
+                const d = document.createElement('div');
+                d.className = 'casa ' + c.status;
+                if(c.status === 'mar') d.innerHTML = iconAgua;
+                if(c.status === 'acerto') d.innerHTML = iconNavio;
+                if(c.status === 'erro') d.innerHTML = iconErro;
+                d.onclick = () => {
+                    if(c.status !== 'mar' || game.vidas <= 0) return;
                     alvoIndex = i;
-                    document.getElementById('pergunta').innerText = casa.pergunta;
+                    document.getElementById('conta').innerText = c.q;
                     document.getElementById('overlay').style.display = 'flex';
                     document.getElementById('resposta').value = '';
                     document.getElementById('resposta').focus();
                 };
-                tab.appendChild(div);
+                grade.appendChild(d);
             });
         }
 
-        function checarResposta() {
-            const userResp = parseInt(document.getElementById('resposta').value);
+        function confirmarTiro() {
+            const resp = parseInt(document.getElementById('resposta').value);
             const alvo = mapa[alvoIndex];
 
-            if(userResp === alvo.resposta) {
-                if(alvo.temNavio) {
+            if(resp === alvo.r) {
+                if(alvo.ship) {
                     alvo.status = 'acerto';
-                    config.navios--;
+                    game.navios--;
                 } else {
                     alvo.status = 'erro';
                 }
             } else {
-                config.vidas--;
-                alert("Errado! A resposta era " + alvo.resposta);
+                game.vidas--;
+                alert("ERRADO! O resultado era " + alvo.r);
             }
 
             document.getElementById('overlay').style.display = 'none';
-            document.getElementById('vidas').innerText = config.vidas;
-            document.getElementById('navios').innerText = config.navios;
-            renderizar();
+            document.getElementById('vidas').innerText = game.vidas;
+            document.getElementById('navios').innerText = game.navios;
+            render();
 
             setTimeout(() => {
-                if(config.navios === 0) { alert("PARABÉNS! Você venceu!"); location.reload(); }
-                else if(config.vidas === 0) { alert("FIM DE JOGO! Tente novamente."); location.reload(); }
+                if(game.navios === 0) { alert("VITÓRIA!"); location.reload(); }
+                else if(game.vidas === 0) { alert("FIM DE JOGO!"); location.reload(); }
             }, 200);
         }
     </script>
