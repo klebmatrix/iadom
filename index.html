@@ -1,52 +1,94 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>IA Multifunção</title>
+    <meta charset="UTF-8">
+    <title>Batalha Naval Matemática JS</title>
+    <style>
+        :root { --blue: #2c3e50; --water: #3498db; --hit: #e74c3c; --miss: #bdc3c7; }
+        body { font-family: sans-serif; text-align: center; background: #ecf0f1; }
+        .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 5px; justify-content: center; margin-top: 20px; }
+        .cell { 
+            width: 60px; height: 60px; background: var(--water); color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px;
+            transition: 0.3s;
+        }
+        .cell:hover { filter: brightness(1.2); }
+        .hit { background: var(--hit) !important; }
+        .miss { background: var(--miss) !important; }
+        #status { margin: 20px; font-size: 20px; font-weight: bold; color: var(--blue); }
+    </style>
 </head>
 <body>
 
-<h2>IA Multifunção</h2>
+    <h1>Batalha Naval Matemática</h1>
+    <p>Clique em um quadrante, resolva a conta e tente encontrar os navios!</p>
+    
+    <div id="status">Vidas: 3 | Acertos: 0</div>
+    <div class="grid" id="board"></div>
 
-<textarea id="texto" rows="6" cols="60" placeholder="Digite o texto..."></textarea><br><br>
+    <script>
+        const board = document.getElementById('board');
+        const statusDisplay = document.getElementById('status');
+        
+        // Configuração do Jogo
+        const size = 5;
+        let lives = 3;
+        let hits = 0;
 
-<button onclick="acao('/resumir')">Resumir</button>
-<button onclick="acao('/traduzir_pt_en')">PT → EN</button>
-<button onclick="acao('/traduzir_en_pt')">EN → PT</button>
-<button onclick="acao('/sentimento')">Sentimento</button>
+        // Dados das células (Conta, Resultado, Tem Navio?)
+        const data = [
+            { q: "4+1", a: 5, ship: true },  { q: "2+3", a: 5, ship: false }, { q: "7-2", a: 5, ship: true },  { q: "1+1", a: 2, ship: false }, { q: "6-3", a: 3, ship: false },
+            { q: "8+2", a: 10, ship: false }, { q: "5x2", a: 10, ship: true }, { q: "9-1", a: 8, ship: false }, { q: "4+4", a: 8, ship: true },  { q: "3+3", a: 6, ship: false },
+            { q: "2x3", a: 6, ship: true },  { q: "10-5", a: 5, ship: false }, { q: "7+3", a: 10, ship: false }, { q: "6x1", a: 6, ship: false }, { q: "4-2", a: 2, ship: true },
+            { q: "9+9", a: 18, ship: false }, { q: "3x4", a: 12, ship: true }, { q: "5+5", a: 10, ship: false }, { q: "8-4", a: 4, ship: false }, { q: "2+7", a: 9, ship: false },
+            { q: "1x5", a: 5, ship: false },  { q: "12-2", a: 10, ship: false }, { q: "6+6", a: 12, ship: false }, { q: "3+1", a: 4, ship: true },  { q: "8x2", a: 16, ship: false }
+        ];
 
-<pre id="resultado"></pre>
+        // Criar o tabuleiro
+        data.forEach((item, index) => {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.innerText = item.q;
+            cell.onclick = () => checkShot(index, cell);
+            board.appendChild(cell);
+        });
 
-<script>
-const API = "https://iadom.onrender.com";
+        function checkShot(index, cellElement) {
+            if (cellElement.classList.contains('hit') || cellElement.classList.contains('miss') || lives <= 0) return;
 
-async function acao(rota) {
-  const texto = document.getElementById("texto").value;
-  const resultado = document.getElementById("resultado");
+            const userAnswer = prompt(`Quanto é ${data[index].q}?`);
+            
+            if (parseInt(userAnswer) === data[index].a) {
+                if (data[index].ship) {
+                    alert("FOGO! Você acertou um navio!");
+                    cellElement.classList.add('hit');
+                    cellElement.innerText = "💥";
+                    hits++;
+                } else {
+                    alert("ÁGUA! Nada aqui...");
+                    cellElement.classList.add('miss');
+                    cellElement.innerText = "🌊";
+                }
+            } else {
+                lives--;
+                alert(`ERROU A CONTA! O resultado era ${data[index].a}. Você perdeu uma vida.`);
+            }
 
-  resultado.innerText = "Processando...";
+            updateStatus();
+        }
 
-  try {
-    const res = await fetch(API + rota, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texto })
-    });
-
-    if (!res.ok) {
-      resultado.innerText = "Erro HTTP: " + res.status;
-      return;
-    }
-
-    const data = await res.json();
-    resultado.innerText = data.resultado;
-
-  } catch (e) {
-    resultado.innerText = "Erro ao conectar com o servidor";
-    console.error(e);
-  }
-}
-</script>
-
+        function updateStatus() {
+            statusDisplay.innerText = `Vidas: ${lives} | Acertos: ${hits}`;
+            if (hits === 8) {
+                statusDisplay.innerText = "🏆 VOCÊ VENCEU! TODOS OS NAVIOS AFUNDADOS!";
+                statusDisplay.style.color = "green";
+            }
+            if (lives <= 0) {
+                statusDisplay.innerText = "☠️ GAME OVER! Suas vidas acabaram.";
+                statusDisplay.style.color = "red";
+            }
+        }
+    </script>
 </body>
 </html>
