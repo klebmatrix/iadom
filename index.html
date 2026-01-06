@@ -12,6 +12,7 @@
             --vermelho: #c62828;
             --verde: #2e7d32;
             --laranja: #ef6c00;
+            --roxo: #6a1b9a;
         }
 
         body {
@@ -19,13 +20,16 @@
             background: #f4f7f9;
             margin: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
         }
 
-        /* Estrutura de Telas */
-        .tela { display: none; width: 100%; max-width: 450px; text-align: center; padding: 20px; }
+        nav { width: 100%; max-width: 450px; margin-bottom: 10px; }
+        .muted-btn { color: #666; font-weight: bold; font-size: 14px; }
+
+        .tela { display: none; width: 100%; max-width: 450px; text-align: center; padding: 20px; box-sizing: border-box; }
         .ativa { display: block; }
 
         .cartao {
@@ -35,115 +39,75 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
 
-        /* Botões de Nível Bem Visíveis */
         .btn-nivel {
-            display: block;
-            width: 100%;
-            padding: 20px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
+            display: block; width: 100%; padding: 18px; margin: 12px 0;
+            border: none; border-radius: 15px; font-size: 18px;
+            font-weight: bold; color: white; cursor: pointer; transition: 0.3s;
         }
 
         .n-1 { background: var(--verde); }
         .n-2 { background: var(--azul-mar); }
         .n-3 { background: var(--laranja); }
+        .n-4 { background: var(--roxo); }
         .btn-nivel:hover { transform: scale(1.03); filter: brightness(1.1); }
 
-        /* Painel de Status */
         .status {
-            display: flex;
-            justify-content: space-around;
-            background: white;
-            padding: 15px;
-            border-radius: 50px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            font-weight: bold;
+            display: flex; justify-content: space-around; background: white;
+            padding: 15px; border-radius: 50px; margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-weight: bold;
         }
 
-        /* Grade do Jogo */
         .grade {
-            display: grid;
-            gap: 10px;
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            border: 2px solid var(--azul-claro);
+            display: grid; gap: 8px; background: white; padding: 15px;
+            border-radius: 20px; border: 2px solid var(--azul-claro); margin: 0 auto;
         }
 
         .casa {
-            width: 60px;
-            height: 60px;
-            background: var(--azul-claro);
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: 0.2s;
+            width: 55px; height: 55px; background: var(--azul-claro);
+            border-radius: 10px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-size: 22px; transition: 0.2s;
         }
 
         .casa.acerto { color: var(--vermelho); background: #ffebee; border: 2px solid var(--vermelho); }
         .casa.erro { color: var(--verde); background: #e8f5e9; border: 2px solid var(--verde); }
 
-        /* Modal de Pergunta */
         .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100;
         }
 
-        .modal {
-            background: white;
-            padding: 30px;
-            border-radius: 25px;
-            width: 300px;
-            text-align: center;
-        }
-
-        .conta { font-size: 50px; font-weight: bold; margin: 20px 0; color: var(--azul-mar); }
-        input { width: 100%; padding: 15px; font-size: 30px; text-align: center; border: 3px solid #eee; border-radius: 15px; outline: none; }
+        .modal { background: white; padding: 30px; border-radius: 25px; width: 300px; text-align: center; }
+        .conta { font-size: 45px; font-weight: bold; margin: 20px 0; color: var(--azul-mar); }
+        input { width: 100%; padding: 15px; font-size: 28px; text-align: center; border: 3px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; }
         .btn-atirar { width: 100%; padding: 15px; background: var(--azul-mar); color: white; border: none; border-radius: 15px; margin-top: 20px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-<nav>
-<div>
-<a href="https://cromosvirtual.com" class="muted-btn" style="text-decoration:none; display:flex; align-items:center; height:38px;">Voltar</a>
-</div>
-</nav>
-    
+
+    <nav>
+        <a href="https://cromosvirtual.com" class="muted-btn" style="text-decoration:none; display:flex; align-items:center;"><i class="fa-solid fa-chevron-left"></i>&nbsp;Voltar</a>
+    </nav>
 
     <div id="tela-niveis" class="tela ativa">
         <div class="cartao">
             <i class="fa-solid fa-anchor" style="font-size: 50px; color: var(--azul-mar);"></i>
             <h1>Operação Naval</h1>
-            <p>Escolha como quer jogar:</p>
+            <p>Escolha o desafio matemático:</p>
             <button class="btn-nivel n-1" onclick="jogar(1)">INICIANTE (+)</button>
             <button class="btn-nivel n-2" onclick="jogar(2)">FÁCIL (-)</button>
             <button class="btn-nivel n-3" onclick="jogar(3)">MÉDIO (×)</button>
+            <button class="btn-nivel n-4" onclick="jogar(4)">DIFÍCIL (+ - × ÷)</button>
         </div>
     </div>
 
     <div id="tela-jogo" class="tela">
         <div class="status">
-            <span><i class="fa-solid fa-heart" style="color:red"></i> Vidas: <span id="vds">10</span></span>
+            <span><i class="fa-solid fa-heart" style="color:red"></i> Vidas: <span id="vds">12</span></span>
             <span><i class="fa-solid fa-crosshairs" style="color:var(--verde)"></i> Baixas: <span id="bxs">0</span></span>
         </div>
         <div id="tabuleiro" class="grade"></div>
         <button onclick="location.reload()" style="margin-top:20px; border:none; background:none; color:#888; cursor:pointer; font-weight:bold;">
-            <i class="fa-solid fa-chevron-left"></i> VOLTAR AOS NÍVEIS
+            <i class="fa-solid fa-rotate-left"></i> TROCAR NÍVEL
         </button>
     </div>
 
@@ -157,21 +121,20 @@
     </div>
 
     <script>
-        let dados = { vidas: 10, baixas: 0, totalNavios: 0 };
+        let dados = { vidas: 12, baixas: 0, totalNavios: 0 };
         let mapa = [];
         let alvoIndex = null;
 
         function jogar(nivel) {
-            // Esconde menu e mostra jogo
             document.getElementById('tela-niveis').classList.remove('ativa');
             document.getElementById('tela-jogo').classList.add('ativa');
 
-            let colunas = nivel === 3 ? 6 : 5;
-            dados.totalNavios = nivel + 3;
-            dados.vidas = 10; // Vidas iniciais
+            let colunas = (nivel >= 3) ? 6 : 5;
+            dados.totalNavios = nivel + 4;
+            dados.vidas = (nivel === 4) ? 15 : 12;
 
             const tab = document.getElementById('tabuleiro');
-            tab.style.gridTemplateColumns = `repeat(${colunas}, 60px)`;
+            tab.style.gridTemplateColumns = `repeat(${colunas}, 55px)`;
 
             for(let i=0; i < colunas * colunas; i++) {
                 mapa.push(criarCasa(nivel));
@@ -181,13 +144,34 @@
         }
 
         function criarCasa(nivel) {
-            let n1 = Math.floor(Math.random() * 10) + 1;
-            let n2 = Math.floor(Math.random() * 10) + 1;
-            let q, r;
-            if(nivel === 1) { q = `${n1} + ${n2}`; r = n1+n2; }
-            else if(nivel === 2) { q = `${Math.max(n1,n2)} - ${Math.min(n1,n2)}`; r = Math.max(n1,n2)-Math.min(n1,n2); }
-            else { q = `${n1} x ${n2}`; r = n1*n2; }
-            return { q, r, temNavio: Math.random() < 0.3, status: 'mar' };
+            let n1, n2, q, r;
+            let modo = nivel;
+            
+            // Se nível for 4, sorteia uma das 4 operações
+            if (nivel === 4) modo = Math.floor(Math.random() * 4) + 1;
+
+            if(modo === 1) { // Soma
+                n1 = Math.floor(Math.random() * 20) + 1;
+                n2 = Math.floor(Math.random() * 20) + 1;
+                q = `${n1} + ${n2}`; r = n1+n2; 
+            }
+            else if(modo === 2) { // Subtração
+                n1 = Math.floor(Math.random() * 20) + 10;
+                n2 = Math.floor(Math.random() * n1) + 1;
+                q = `${n1} - ${n2}`; r = n1-n2; 
+            }
+            else if(modo === 3) { // Multiplicação
+                n1 = Math.floor(Math.random() * 10) + 1;
+                n2 = Math.floor(Math.random() * 10) + 1;
+                q = `${n1} x ${n2}`; r = n1*n2; 
+            }
+            else { // Divisão Exata
+                r = Math.floor(Math.random() * 9) + 1;
+                n2 = Math.floor(Math.random() * 9) + 1;
+                n1 = r * n2;
+                q = `${n1} ÷ ${n2}`;
+            }
+            return { q, r, temNavio: Math.random() < 0.35, status: 'mar' };
         }
 
         function desenhar() {
@@ -219,8 +203,7 @@
             const alvo = mapa[alvoIndex];
 
             if(resp === alvo.r) {
-                // SE ACERTAR A CONTA, GASTA VIDA (PENALIDADE DE TIRO)
-                dados.vidas--;
+                dados.vidas--; // Gasta 1 vida ao acertar a conta (tiro disparado)
                 
                 if(alvo.temNavio) {
                     alvo.status = 'acerto';
@@ -229,9 +212,8 @@
                     alvo.status = 'erro';
                 }
             } else {
-                // SE ERRAR A CONTA, PERDE 2 VIDAS
-                dados.vidas -= 2;
-                alert("ERROU O CÁLCULO! O inimigo revidou.");
+                dados.vidas -= 2; // Penalidade por erro matemático
+                alert("CONTA ERRADA! O inimigo revidou e você perdeu 2 vidas.");
             }
 
             document.getElementById('overlay').style.display = 'none';
@@ -247,15 +229,16 @@
 
         function checarFim() {
             setTimeout(() => {
-                if(dados.baixas >= dados.totalNavios) { alert("VITÓRIA! Frota destruída."); location.reload(); }
-                else if(dados.vidas <= 0) { alert("DERROTA! Você ficou sem recursos."); location.reload(); }
+                if(dados.baixas >= dados.totalNavios) { 
+                    alert("🏆 VITÓRIA! Você limpou o oceano com maestria matemática!"); 
+                    location.reload(); 
+                }
+                else if(dados.vidas <= 0) { 
+                    alert("💀 DERROTA! Suas vidas acabaram. Estude mais e tente novamente!"); 
+                    location.reload(); 
+                }
             }, 300);
         }
- </script>
- <br>
-    
-
+    </script>
 </body>
 </html>
-
-
