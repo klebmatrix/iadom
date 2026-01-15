@@ -3,384 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalha Naval Matemática</title>
+    <title>NeuroWorkspace Professional v7.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --azul-mar: #0277bd;
-            --azul-claro: #e1f5fe;
-            --vermelho: #c62828;
-            --verde: #2e7d32;
-            --laranja: #ef6c00;
-            --roxo: #6a1b9a;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f7f9;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        nav { width: 100%; max-width: 450px; margin-bottom: 10px; }
-        .muted-btn { color: #666; font-weight: bold; font-size: 14px; }
-
-        .tela { display: none; width: 100%; max-width: 450px; text-align: center; padding: 20px; box-sizing: border-box; }
-        .ativa { display: block; }
-
-        .cartao {
-            background: white;
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        }
-
-        .btn-nivel {
-            display: block; width: 100%; padding: 18px; margin: 12px 0;
-            border: none; border-radius: 15px; font-size: 18px;
-            font-weight: bold; color: white; cursor: pointer; transition: 0.3s;
-        }
-
-        .n-1 { background: var(--verde); }
-        .n-2 { background: var(--azul-mar); }
-        .n-3 { background: var(--laranja); }
-        .n-4 { background: var(--roxo); }
-        .btn-nivel:hover { transform: scale(1.03); filter: brightness(1.1); }
-
-        .status {
-            display: flex; justify-content: space-around; background: white;
-            padding: 15px; border-radius: 50px; margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-weight: bold;
-        }
-
-        .grade {
-            display: grid; gap: 8px; background: white; padding: 15px;
-            border-radius: 20px; border: 2px solid var(--azul-claro); margin: 0 auto;
-        }
-
-        .casa {
-            width: 55px; height: 55px; background: var(--azul-claro);
-            border-radius: 10px; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; font-size: 22px; transition: 0.2s;
-        }
-
-        .casa.acerto { color: var(--vermelho); background: #ffebee; border: 2px solid var(--vermelho); }
-        .casa.erro { color: var(--verde); background: #e8f5e9; border: 2px solid var(--verde); }
-
-        .overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100;
-        }
-
-        .modal { background: white; padding: 30px; border-radius: 25px; width: 300px; text-align: center; }
-        .conta { font-size: 45px; font-weight: bold; margin: 20px 0; color: var(--azul-mar); }
-        input { width: 100%; padding: 15px; font-size: 28px; text-align: center; border: 3px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; }
-        .btn-atirar { width: 100%; padding: 15px; background: var(--azul-mar); color: white; border: none; border-radius: 15px; margin-top: 20px; font-weight: bold; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-    <nav>
-        <a href="https://cromosvirtual.com" class="muted-btn" style="text-decoration:none; display:flex; align-items:center;"><i class="fa-solid fa-chevron-left"></i>&nbsp;Voltar</a>
-    </nav>
-
-    <div id="tela-niveis" class="tela ativa">
-        <div class="cartao">
-            <i class="fa-solid fa-anchor" style="font-size: 50px; color: var(--azul-mar);"></i>
-            <h1>Operação Naval</h1>
-            <p>Escolha o desafio matemático:</p>
-            <button class="btn-nivel n-1" onclick="jogar(1)">INICIANTE (+)</button>
-            <button class="btn-nivel n-2" onclick="jogar(2)">FÁCIL (-)</button>
-            <button class="btn-nivel n-3" onclick="jogar(3)">MÉDIO (×)</button>
-            <button class="btn-nivel n-4" onclick="jogar(4)">DIFÍCIL (+ - × ÷)</button>
-        </div>
-    </div>
-
-    <div id="tela-jogo" class="tela">
-        <div class="status">
-            <span><i class="fa-solid fa-heart" style="color:red"></i> Vidas: <span id="vds">12</span></span>
-            <span><i class="fa-solid fa-crosshairs" style="color:var(--verde)"></i> Baixas: <span id="bxs">0</span></span>
-        </div>
-        <div id="tabuleiro" class="grade"></div>
-        <button onclick="location.reload()" style="margin-top:20px; border:none; background:none; color:#888; cursor:pointer; font-weight:bold;">
-            <i class="fa-solid fa-rotate-left"></i> TROCAR NÍVEL
-        </button>
-    </div>
-
-    <div id="overlay" class="overlay">
-        <div class="modal">
-            <h3 style="margin:0;">RESOLVA O CÁLCULO</h3>
-            <div id="txt-conta" class="conta"></div>
-            <input type="number" id="campo-resposta" placeholder="?">
-            <button class="btn-atirar" onclick="disparar()">DISPARAR!</button>
-        </div>
-    </div>
-
-    <script>
-        let dados = { vidas: 12, baixas: 0, totalNavios: 0 };
-        let mapa = [];
-        let alvoIndex = null;
-
-        function jogar(nivel) {
-            document.getElementById('tela-niveis').classList.remove('ativa');
-            document.getElementById('tela-jogo').classList.add('ativa');
-
-            let colunas = (nivel >= 3) ? 6 : 5;
-            dados.totalNavios = nivel + 4;
-            dados.vidas = (nivel === 4) ? 15 : 12;
-
-            const tab = document.getElementById('tabuleiro');
-            tab.style.gridTemplateColumns = `repeat(${colunas}, 55px)`;
-
-            for(let i=0; i < colunas * colunas; i++) {
-                mapa.push(criarCasa(nivel));
-            }
-            atualizar();
-            desenhar();
-        }
-
-        function criarCasa(nivel) {
-            let n1, n2, q, r;
-            let modo = nivel;
-            
-            // Se nível for 4, sorteia uma das 4 operações
-            if (nivel === 4) modo = Math.floor(Math.random() * 4) + 1;
-
-            if(modo === 1) { // Soma
-                n1 = Math.floor(Math.random() * 20) + 1;
-                n2 = Math.floor(Math.random() * 20) + 1;
-                q = `${n1} + ${n2}`; r = n1+n2; 
-            }
-            else if(modo === 2) { // Subtração
-                n1 = Math.floor(Math.random() * 20) + 10;
-                n2 = Math.floor(Math.random() * n1) + 1;
-                q = `${n1} - ${n2}`; r = n1-n2; 
-            }
-            else if(modo === 3) { // Multiplicação
-                n1 = Math.floor(Math.random() * 10) + 1;
-                n2 = Math.floor(Math.random() * 10) + 1;
-                q = `${n1} x ${n2}`; r = n1*n2; 
-            }
-            else { // Divisão Exata
-                r = Math.floor(Math.random() * 9) + 1;
-                n2 = Math.floor(Math.random() * 9) + 1;
-                n1 = r * n2;
-                q = `${n1} ÷ ${n2}`;
-            }
-            return { q, r, temNavio: Math.random() < 0.35, status: 'mar' };
-        }
-
-        function desenhar() {
-            const tab = document.getElementById('tabuleiro');
-            tab.innerHTML = '';
-            mapa.forEach((casa, i) => {
-                const div = document.createElement('div');
-                div.className = 'casa ' + casa.status;
-                
-                if(casa.status === 'mar') div.innerHTML = '<i class="fa-solid fa-water" style="opacity:0.2"></i>';
-                else if(casa.status === 'acerto') div.innerHTML = '<i class="fa-solid fa-explosion"></i>';
-                else if(casa.status === 'erro') div.innerHTML = '<i class="fa-solid fa-check"></i>';
-
-                div.onclick = () => {
-                    if(casa.status !== 'mar' || dados.vidas <= 0) return;
-                    alvoIndex = i;
-                    document.getElementById('txt-conta').innerText = casa.q;
-                    document.getElementById('overlay').style.display = 'flex';
-                    const inp = document.getElementById('campo-resposta');
-                    inp.value = '';
-                    setTimeout(() => inp.focus(), 100);
-                };
-                tab.appendChild(div);
-            });
-        }
-
-        function disparar() {
-            const resp = parseInt(document.getElementById('campo-resposta').value);
-            const alvo = mapa[alvoIndex];
-
-            if(resp === alvo.r) {
-                dados.vidas--; // Gasta 1 vida ao acertar a conta (tiro disparado)
-                
-                if(alvo.temNavio) {
-                    alvo.status = 'acerto';
-                    dados.baixas++;
-                } else {
-                    alvo.status = 'erro';
-                }
-            } else {
-                dados.vidas -= 2; // Penalidade por erro matemático
-                alert("CONTA ERRADA! O inimigo revidou e você perdeu 2 vidas.");
-            }
-
-            document.getElementById('overlay').style.display = 'none';
-            atualizar();
-            desenhar();
-            checarFim();
-        }
-
-        function atualizar() {
-            document.getElementById('vds').innerText = Math.max(0, dados.vidas);
-            document.getElementById('bxs').innerText = dados.baixas;
-        }
-
-        function checarFim() {
-            setTimeout(() => {
-                if(dados.baixas >= dados.totalNavios) { 
-                    alert("🏆 VITÓRIA! Você limpou o oceano com maestria matemática!"); 
-                    location.reload(); 
-                }
-                else if(dados.vidas <= 0) { 
-                    alert("💀 DERROTA! Suas vidas acabaram. Estude mais e tente novamente!"); 
-                    location.reload(); 
-                }
-            }, 300);
-        }
-    </script>
-
-
-
-<html lang="pt-br" ng-app="MathGameApp">
-<head>
-    <meta charset="UTF-8">
-    <title>Math Hunt - Versão Final</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
     <style>
-        :root { --blue-ui: #4fb3ff; --dark-blue: #2c3e50; --success: #2ecc71; --error: #e74c3c; }
-        body { font-family: 'Arial Rounded MT Bold', sans-serif; background: #e0f4ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        :root {
+            --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff;
+            --text: #0f172a; --border: #e2e8f0; --success: #10b981; 
+            --accent: #38bdf8; --error: #ef4444; --dark-blue: #1e293b;
+        }
+
+        body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--dark-blue); color: white; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
+        .sidebar h2 { color: var(--accent); font-size: 1.1rem; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .nav-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 0.95rem; }
+        .nav-item:hover { background: #334155; }
+        .nav-item.active { background: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+
+        /* Main Content */
+        .main { flex-grow: 1; padding: 25px; overflow-y: auto; position: relative; }
+        .tab-content { display: none; max-width: 900px; margin: 0 auto; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Card e Layouts Genéricos */
+        .card { background: var(--surface); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+
+        /* TOAST LIKE */
+        .toast {
+            position: fixed; top: 20px; right: 20px; background: var(--success); color: white;
+            padding: 15px 30px; border-radius: 50px; font-weight: 800; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: none; z-index: 1000; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.5) translateY(-50px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+        /* ESTILO BATALHA NAVAL */
+        .grade-naval { display: grid; gap: 8px; background: #e0f2fe; padding: 15px; border-radius: 15px; margin: 0 auto; width: fit-content; }
+        .casa-naval { width: 50px; height: 50px; background: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; border: 1px solid #bae6fd; }
+        .casa-naval.acerto { background: #fee2e2; color: var(--error); border-color: var(--error); }
+        .casa-naval.erro { background: #dcfce7; color: var(--success); border-color: var(--success); }
+
+        /* ESTILO MATH HUNT */
+        .math-hunt-grid { display: grid; grid-template-columns: repeat(6, 55px); gap: 8px; justify-content: center; }
+        .cell-hunt { background: white; border: 2px solid var(--border); border-radius: 8px; height: 55px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .cell-hunt.correct { background: var(--success) !important; color: white; transform: scale(1.1); }
+        .cell-hunt.wrong { background: var(--error) !important; color: white; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* Overlay Modal */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 2000; }
+        .modal { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 300px; }
+        .modal input { width: 100%; padding: 12px; font-size: 24px; text-align: center; margin: 15px 0; border: 2px solid var(--border); border-radius: 10px; }
         
-        .game-container { display: flex; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 5px solid var(--blue-ui); }
-        
-        .side-panel { width: 180px; margin-right: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .status-box { background: var(--blue-ui); color: white; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 4px solid #3a8cc7; }
-        .status-box label { font-size: 12px; text-transform: uppercase; display: block; }
-        .status-box span { font-size: 22px; font-weight: bold; }
-
-        .grid-container { display: grid; grid-template-columns: repeat(6, 60px); gap: 8px; background: #a4d3ee; padding: 12px; border-radius: 10px; }
-        
-        /* Estilo das Células */
-        .cell { 
-            background: #ffffff; border: 2px solid #8ecae6; border-radius: 8px; 
-            display: flex; justify-content: center; align-items: center; 
-            font-size: 20px; font-weight: bold; color: var(--dark-blue); 
-            cursor: pointer; transition: all 0.2s ease; height: 60px;
-        }
-
-        /* CLASSE DE ACERTO (VERDE) */
-        .cell.correct { 
-            background-color: var(--success) !important; 
-            color: white !important; 
-            border-color: #27ae60 !important;
-            transform: scale(1.1);
-            z-index: 10;
-        }
-
-        /* CLASSE DE ERRO (VERMELHO TEMPORÁRIO) */
-        .cell.wrong { 
-            background-color: var(--error) !important; 
-            color: white !important; 
-            animation: shake 0.3s;
-        }
-
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
-        }
-
-        .goal-box { background: #f8f9fa; border: 3px dashed var(--blue-ui); padding: 15px; text-align: center; border-radius: 10px; }
-        .goal-box h2 { margin: 5px 0 0; font-size: 32px; color: var(--dark-blue); }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
     </style>
 </head>
- <hr>
-<body ng-controller="GameCtrl">
+<body ng-app="NeuroApp" ng-controller="MainCtrl">
 
-    <div class="game-container">
-        <div class="side-panel">
-            <div class="status-box">
-                <label>Level</label>
-                <span>{{ level }}</span>
-            </div>
-            <div class="status-box">
-                <label>Score</label>
-                <span>{{ score }}</span>
-            </div>
-            <div class="status-box" ng-style="{'background-color': tempo <= 10 ? '#e74c3c' : '#4fb3ff'}">
-                <label>Time</label>
-                <span>{{ tempo }}</span>
-            </div>
-            
-            <div class="goal-box">
-                <label>ENCONTRE O TOTAL</label>
-                <h2>{{ n1 }} + {{ n2 }}</h2>
-            </div>
-            
-            <button ng-click="resetGame()" style="margin-top:auto; padding:12px; cursor:pointer; background:var(--dark-blue); border:none; color:white; border-radius:8px; font-weight:bold;">REINICIAR</button>
-        </div>
+<div id="toast" class="toast">👍 Mandou bem!</div>
 
-        <div class="grid-container">
-            <div ng-repeat="item in grade" 
-                 class="cell" 
-                 ng-class="{'correct': item.acertou, 'wrong': item.errou}"
-                 ng-click="verificar(item)">
-                {{ item.valor }}
+<div class="sidebar">
+    <h2>🧠 NeuroWorkspace</h2>
+    <div class="nav-item active" onclick="switchTab('tab-naval')"><i class="fa-solid fa-ship"></i> Batalha Naval</div>
+    <div class="nav-item" onclick="switchTab('tab-hunt')"><i class="fa-solid fa-bullseye"></i> Math Hunt</div>
+    <div style="margin-top:auto; background: #334155; padding: 15px; border-radius: 12px;">
+        <small style="opacity:0.7">SCORE GLOBAL</small><br>
+        <strong style="font-size: 1.2rem;">{{ globalScore }} pts</strong>
+    </div>
+</div>
+
+<div class="main">
+    
+    <div id="tab-naval" class="tab-content active">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>Operação Naval: {{ navalStatus }}</h3>
+                <div>
+                    <span style="margin-right:15px"><i class="fa-solid fa-heart" style="color:var(--error)"></i> {{ navalVidas }}</span>
+                    <span><i class="fa-solid fa-crosshairs"></i> {{ navalBaixas }}</span>
+                </div>
+            </div>
+
+            <div class="grade-naval" id="gridNaval">
+                </div>
+            
+            <div style="margin-top:20px; text-align:center;">
+                <button class="btn-primary" style="width:auto;" onclick="resetNaval()">Reiniciar Oceano</button>
             </div>
         </div>
     </div>
 
-    <script>
-        var app = angular.module('MathGameApp', []);
+    <div id="tab-hunt" class="tab-content">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <div>
+                    <small>ENCONTRE O TOTAL</small>
+                    <h2 style="margin:0; color:var(--primary)">{{ n1 }} + {{ n2 }}</h2>
+                </div>
+                <div style="text-align:right">
+                    <span>Nível: {{ huntLevel }}</span><br>
+                    <span>Tempo: {{ tempo }}s</span>
+                </div>
+            </div>
 
-        app.controller('GameCtrl', function($scope, $interval, $timeout) {
-            $scope.level = 1;
-            $scope.score = 0;
-            $scope.tempo = 90;
-            
-            $scope.gerarNivel = function() {
-                $scope.n1 = Math.floor(Math.random() * (5 * $scope.level)) + 1;
-                $scope.n2 = Math.floor(Math.random() * (5 * $scope.level)) + 1;
-                var resposta = $scope.n1 + $scope.n2;
+            <div class="math-hunt-grid">
+                <div ng-repeat="item in gradeHunt" 
+                     class="cell-hunt" 
+                     ng-class="{'correct': item.acertou, 'wrong': item.errou}"
+                     ng-click="verificarHunt(item)">
+                    {{ item.valor }}
+                </div>
+            </div>
+        </div>
+    </div>
 
-                $scope.grade = [];
-                for(var i=0; i<36; i++) {
-                    $scope.grade.push({ valor: Math.floor(Math.random() * (resposta + 20)), acertou: false, errou: false });
-                }
-                $scope.grade[Math.floor(Math.random() * 36)].valor = resposta;
-            };
+</div>
 
-            $scope.verificar = function(item) {
-                if (item.valor === ($scope.n1 + $scope.n2)) {
-                    item.acertou = true; // Ativa a classe .correct (Verde)
-                    $scope.score += 10;
-                    $scope.level++;
-                    $scope.tempo += 5;
+<div id="overlayNaval" class="overlay">
+    <div class="modal">
+        <h3>Calcule para atirar:</h3>
+        <div id="contaNaval" style="font-size: 32px; font-weight: bold; margin: 10px 0;"></div>
+        <input type="number" id="respNaval" placeholder="?">
+        <button class="btn-primary" onclick="dispararNaval()">DISPARAR!</button>
+    </div>
+</div>
 
-                    // Espera 600ms para o usuário ver o verde antes de mudar de nível
-                    $timeout(function() {
-                        $scope.gerarNivel();
-                    }, 600);
-                } else {
-                    item.errou = true;
-                    $timeout(function() { item.errou = false; }, 300);
-                    $scope.tempo -= 3;
-                }
-            };
+<script>
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
 
-            $scope.resetGame = function() {
-                $scope.level = 1; $scope.score = 0; $scope.tempo = 90;
-                $scope.gerarNivel();
-            };
+    // Feedback Visual Global
+    function showLike(msg) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        const t = document.getElementById('toast');
+        t.innerText = "👍 " + (msg || "Excelente!");
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
+    }
 
-            $interval(function() { if($scope.tempo > 0) $scope.tempo--; }, 1000);
-            $scope.gerarNivel();
-        });
-    </script>
-</body>
-</html>
+    // --- LÓGICA BATALHA NAVAL (Vanilla JS) ---
+    let navalVidas = 12;
+    let navalBaixas = 0;
+    let mapaNaval = [];
+    let alvoNavalIndex = null;
 
+    function resetNaval() {
+        navalVidas = 12; navalBaixas = 0; mapaNaval = [];
+        const grid = document.getElementById('gridNaval');
+        grid.style.gridTemplateColumns = `repeat(5, 50px)`;
+        grid.innerHTML = '';
+        for(let i=0; i<25; i++) {
+            let n1 = Math.floor(Math.random()*10)+1, n2 = Math.floor(Math.random()*10)+1;
+            mapaNaval.push({ q: `${n1} + ${n2}`, r: n1+n2, temNavio: Math.random() < 0.3, status: 'mar' });
+            let casa = document.createElement('div');
+            casa.className = 'casa-naval';
+            casa.id = 'casa-' + i;
+            casa.innerHTML = '<i class="fa-solid fa-water" style="opacity:0.2; font-size:12px"></i>';
+            casa.onclick = () => abrirModalNaval(i);
+            grid.appendChild(casa);
+        }
+        document.getElementById('vds').innerText = navalVidas; 
+    }
+
+    function abrirModalNaval(i) {
+        if(mapaNaval[i].status !== 'mar') return;
+        alvoNavalIndex = i;
+        document.getElementById('contaNaval').innerText = mapaNaval[i].q;
+        document.getElementById('overlayNaval').style.display = 'flex';
+        document.getElementById('respNaval').focus();
+    }
+
+    function dispararNaval() {
+        let resp = parseInt(document.getElementById('respNaval').value);
+        let alvo = mapaNaval[alvoNavalIndex];
+        let casaDiv = document.getElementById('casa-' + alvoNavalIndex);
+
+        if(resp === alvo.r) {
+            if(alvo.temNavio) {
+                alvo.status = 'acerto';
+                casaDiv.className = 'casa-naval acerto';
+                casaDiv.innerHTML = '<i class="fa-solid fa-explosion"></i>';
+                navalBaixas++;
+                showLike("Alvo atingido!");
+            } else {
+                alvo.status = 'erro';
+                casaDiv.className = 'casa-naval erro';
+                casaDiv.innerHTML = '<i class="fa-solid fa-droplet"></i>';
+            }
+        } else {
+            navalVidas -= 2;
+            alert("Errou o cálculo! O inimigo contra-atacou.");
+        }
+        document.getElementById('overlayNaval').style.display = 'none';
+        document.getElementById('respNaval').value = '';
+    }
+
+    // --- LÓGICA MATH HUNT (AngularJS) ---
+    var app = angular.module('NeuroApp', []);
+    app.controller('MainCtrl', function($scope, $interval, $timeout) {
+        $scope.globalScore = 0;
+        $scope.huntLevel = 1;
+        $scope.tempo = 90;
+
+        $scope.gerarHunt = function() {
+            $scope.n1 = Math.floor(Math.random() * (5 * $scope.huntLevel)) + 1;
+            $scope.n2 = Math.floor(Math.random() * (5 * $scope.huntLevel)) + 1;
+            let resp = $scope.n1 + $scope.n2;
+            $scope.gradeHunt = [];
+            for(let i=0; i<36; i++) {
+                $scope.gradeHunt.push({ valor: Math.floor(Math.random() * (resp + 15)), acertou: false, errou: false });
+            }
+            $scope.gradeHunt[Math.floor(Math.random()*36)].valor = resp;
+        };
+
+        $scope.verificarHunt = function(item) {
+            if(item.valor === ($scope.n1 + $scope.n2)) {
+                item.acertou = true;
+                $scope.globalScore += 10;
+                $scope.huntLevel++;
+                showLike("Perfeito!");
+                $timeout(() => $scope.gerarHunt(), 600);
+            } else {
+                item.errou = true;
+                $timeout(() => item.errou = false, 300);
+                $scope.tempo -= 3;
+            }
+        };
+
+        $interval(() => { if($scope.tempo > 0) $scope.tempo--; }, 1000);
+        $scope.gerarHunt();
+    });
+
+    window.onload = resetNaval;
+</script>
 </body>
 </html>
