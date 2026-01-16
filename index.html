@@ -3,169 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labirinto Matemático: Início e Saída</title>
+    <title>Labirinto Matemático - Cromos Virtual</title>
     <style>
         :root {
             --primary: #4F46E5;
             --success: #22C55E;
-            --start-color: #3B82F6;
-            --end-color: #F59E0B;
-            --bg: #F8FAFC;
+            --bg: #F1F5F9;
+            --text: #1E293B;
         }
 
         body { 
-            font-family: system-ui, sans-serif;
-            background-color: var(--bg);
-            display: flex; flex-direction: column; align-items: center; padding: 20px;
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; 
+            margin: 0; padding: 20px;
         }
 
-        .controls { margin-bottom: 20px; display: flex; gap: 10px; }
+        /* Barra Superior com o Link de Voltar */
+        .top-nav {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .link-voltar {
+            text-decoration: none;
+            background: #64748B;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .link-voltar:hover { background: #475569; }
+
+        .difficulty-controls { display: flex; gap: 8px; }
         
-        /* Estilo das etiquetas de INÍCIO e SAÍDA */
-        .marker {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .btn-diff {
+            border: none; padding: 10px 15px; border-radius: 8px;
+            color: white; cursor: pointer; font-weight: bold; font-size: 13px;
         }
-        .start-text { color: var(--start-color); }
-        .end-text { color: var(--end-color); }
 
-        .maze-container {
+        /* Estrutura do Labirinto */
+        .maze-grid {
             display: grid;
-            grid-template-columns: repeat(4, 110px);
+            grid-template-columns: repeat(4, 115px);
             gap: 40px;
-            padding: 30px;
+            padding: 35px;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
         .cell {
-            width: 110px; height: 100px;
-            background: #fff;
-            border-radius: 12px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            position: relative;
+            width: 115px; height: 105px;
             border: 3px solid #E2E8F0;
+            border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; background: #fff;
         }
 
-        /* Cores especiais para Início e Saída */
-        .cell.start-cell { border-color: var(--start-color); background: #EFF6FF; }
-        .cell.end-cell { border-color: var(--end-color); }
-
-        .cell.active { border-color: var(--primary); background: #EEF2FF; }
+        .cell.start { border-color: #3B82F6; background: #EFF6FF; }
+        .cell.end { border-color: #F59E0B; background: #FFFBEB; }
+        .cell.active { border-color: var(--primary); transform: scale(1.02); }
         .cell.correct { border-color: var(--success); background: #F0FDF4; }
+
+        .node-label {
+            position: absolute; top: -25px; font-size: 11px; font-weight: 900; 
+            letter-spacing: 0.5px;
+        }
 
         input {
             width: 80%; border: none; background: transparent;
-            text-align: center; font-size: 22px; font-weight: bold; outline: none;
+            text-align: center; font-size: 26px; font-weight: bold; outline: none;
         }
 
-        .op-tag {
+        /* Etiquetas de Operação */
+        .op-box {
             position: absolute; background: var(--primary); color: white;
-            padding: 3px 7px; border-radius: 5px; font-size: 11px; font-weight: bold;
+            padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .tag-right { top: 50%; right: -35px; transform: translateY(-50%); }
-        .tag-down { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .op-r { top: 50%; right: -32px; transform: translateY(-50%); }
+        .op-d { bottom: -30px; left: 50%; transform: translateX(-50%); }
 
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; }
-        #victory-msg { margin-top: 20px; font-size: 20px; font-weight: bold; color: var(--success); }
+        #msg-vitoria { 
+            margin-top: 25px; font-size: 22px; font-weight: bold; 
+            color: var(--success); text-align: center; height: 40px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Labirinto Lógico</h1>
-    
-    <div class="controls">
-        <button class="btn" style="background: #34D399" onclick="initGame('easy')">Fácil</button>
-        <button class="btn" style="background: #EF4444" onclick="initGame('hard')">Difícil</button>
+    <div class="top-nav">
+        <a href="https://cromosvirtual.com" class="link-voltar">← Voltar para Cromos Virtual</a>
+        
+        <div class="difficulty-controls">
+            <button class="btn-diff" style="background: #10B981" onclick="initGame('easy')">Fácil</button>
+            <button class="btn-diff" style="background: #EF4444" onclick="initGame('hard')">Difícil</button>
+        </div>
     </div>
 
-    <div id="maze" class="maze-container"></div>
-    <div id="victory-msg"></div>
+    <div id="maze" class="maze-grid"></div>
+    
+    <div id="msg-vitoria"></div>
 
     <script>
-        const configMaze = [
-            { type: 'start' }, // Quadrado 1: Início
-            { opType: 'right' }, { opType: 'right' }, { opType: 'down' },
-            { opType: 'left' }, { opType: 'left' }, { opType: 'down' },
-            { opType: 'right' }, { type: 'end' } // Quadrado final: Saída
+        const layout = [
+            { type: 'start' }, { dir: 'r' }, { dir: 'r' }, { dir: 'd' },
+            { dir: 'l' }, { dir: 'l' }, { dir: 'd' }, { dir: 'r' }, { type: 'end' }
         ];
 
-        let results = [];
+        let correctAnswers = [];
 
-        function initGame(diff) {
-            const maze = document.getElementById('maze');
-            maze.innerHTML = '';
-            document.getElementById('victory-msg').innerText = '';
-            results = [];
+        function initGame(level) {
+            const container = document.getElementById('maze');
+            const msg = document.getElementById('msg-vitoria');
+            container.innerHTML = '';
+            msg.innerText = '';
+            correctAnswers = [];
 
-            let val = (diff === 'hard') ? Math.floor(Math.random() * 40) + 10 : Math.floor(Math.random() * 9) + 2;
-            results.push(val);
+            // Valor inicial
+            let current = (level === 'hard') ? Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 8) + 2;
+            correctAnswers.push(current);
 
-            // Geração da lógica
-            const steps = [];
-            for(let i=0; i < configMaze.length - 1; i++) {
-                let factor = (diff === 'hard') ? Math.floor(Math.random() * 8) + 3 : Math.floor(Math.random() * 5) + 2;
-                let op = (diff === 'hard' && Math.random() > 0.5) ? 'x' : '+';
-                val = (op === 'x') ? val * factor : val + factor;
+            let steps = [];
+            for(let i=0; i < layout.length - 1; i++) {
+                let op = (level === 'hard' && Math.random() > 0.5) ? 'x' : '+';
+                let factor = (op === 'x') ? Math.floor(Math.random() * 4) + 2 : Math.floor(Math.random() * 10) + 1;
+                current = (op === 'x') ? current * factor : current + factor;
                 steps.push({ op, factor });
-                results.push(val);
+                correctAnswers.push(current);
             }
 
-            // Renderização
-            configMaze.forEach((conf, i) => {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
+            // Renderizar células
+            layout.forEach((node, i) => {
+                const div = document.createElement('div');
+                div.className = 'cell';
                 
-                if (i === 0) {
-                    cell.classList.add('start-cell');
-                    cell.innerHTML = `<span class="marker start-text">▶ Início</span><b>${results[0]}</b>`;
+                if(i === 0) {
+                    div.classList.add('start');
+                    div.innerHTML = `<span class="node-label" style="color:#3B82F6">INÍCIO</span><b>${correctAnswers[0]}</b>`;
                 } else {
-                    const isEnd = (i === configMaze.length - 1);
-                    if(isEnd) {
-                        cell.classList.add('end-cell');
-                        cell.innerHTML = `<span class="marker end-text">🏁 Saída</span>`;
+                    if(i === layout.length - 1) {
+                        div.classList.add('end');
+                        div.innerHTML = `<span class="node-label" style="color:#F59E0B">SAÍDA</span>`;
                     }
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.disabled = true;
-                    input.oninput = (e) => validate(e.target, i);
-                    cell.appendChild(input);
+                    input.placeholder = "?";
+                    input.oninput = (e) => checkAnswer(e.target, i);
+                    div.appendChild(input);
                 }
 
                 if(steps[i]) {
-                    const tag = document.createElement('span');
-                    tag.className = `op-tag ${conf.opType === 'right' ? 'tag-right' : 'tag-down'}`;
-                    tag.innerText = `${steps[i].op} ${steps[i].factor}`;
-                    cell.appendChild(tag);
+                    const opTag = document.createElement('span');
+                    opTag.className = `op-box op-${node.dir || 'r'}`;
+                    opTag.innerText = `${steps[i].op === 'x' ? '×' : '+'} ${steps[i].factor}`;
+                    div.appendChild(opTag);
                 }
-                maze.appendChild(cell);
+                container.appendChild(div);
             });
-            unlock(1);
+            unlockInput(1);
         }
 
-        function unlock(idx) {
+        function unlockInput(idx) {
             const inputs = document.querySelectorAll('input');
-            const target = inputs[idx-1]; // -1 porque o primeiro quadrado não tem input
-            if(target) {
-                target.disabled = false;
-                target.parentElement.classList.add('active');
-                target.focus();
+            const current = inputs[idx-1];
+            if(current) {
+                current.disabled = false;
+                current.parentElement.classList.add('active');
+                current.focus();
             }
         }
 
-        function validate(input, idx) {
-            if(parseInt(input.value) === results[idx]) {
+        function checkAnswer(input, idx) {
+            if(parseInt(input.value) === correctAnswers[idx]) {
                 input.parentElement.classList.replace('active', 'correct');
                 input.disabled = true;
-                if(idx < results.length - 1) unlock(idx + 1);
-                else document.getElementById('victory-msg').innerText = "🏆 PARABÉNS! VOCÊ CHEGOU NA SAÍDA!";
+                if(idx < correctAnswers.length - 1) unlockInput(idx + 1);
+                else document.getElementById('msg-vitoria').innerText = "🏆 Excelente! Você chegou ao final!";
             }
         }
 
