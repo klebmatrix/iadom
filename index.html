@@ -1,185 +1,175 @@
 <!DOCTYPE html>
-<html lang="pt-br" ng-app="NeuroApp">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroWorkspace Professional v8.0</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <title>Labirinto Matemático: Início e Saída</title>
     <style>
         :root {
-            --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff;
-            --text: #0f172a; --border: #e2e8f0; --success: #10b981; 
-            --accent: #38bdf8; --error: #ef4444; --dark-blue: #1e293b;
+            --primary: #4F46E5;
+            --success: #22C55E;
+            --start-color: #3B82F6;
+            --end-color: #F59E0B;
+            --bg: #F8FAFC;
         }
 
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+        body { 
+            font-family: system-ui, sans-serif;
+            background-color: var(--bg);
+            display: flex; flex-direction: column; align-items: center; padding: 20px;
+        }
 
-        /* Sidebar */
-        .sidebar { width: 270px; background: var(--dark-blue); color: white; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; }
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; }
         
-        /* Link Home */
-        .home-link { 
-            text-decoration: none; color: var(--accent); font-weight: bold; 
-            display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
-            padding: 10px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);
-            transition: 0.3s;
+        /* Estilo das etiquetas de INÍCIO e SAÍDA */
+        .marker {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .home-link:hover { background: rgba(56, 189, 248, 0.1); transform: translateX(5px); }
+        .start-text { color: var(--start-color); }
+        .end-text { color: var(--end-color); }
 
-        .sidebar h2 { font-size: 1rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 10px 0; }
-        
-        .nav-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; gap: 10px; font-weight: 500; }
-        .nav-item:hover { background: #334155; }
-        .nav-item.active { background: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-
-        /* Conteúdo */
-        .main { flex-grow: 1; padding: 25px; overflow-y: auto; position: relative; }
-        .tab-content { display: none; max-width: 900px; margin: 0 auto; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { background: var(--surface); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-
-        /* Feedback Toast */
-        .toast {
-            position: fixed; top: 20px; right: 20px; background: var(--success); color: white;
-            padding: 15px 30px; border-radius: 50px; font-weight: 800; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: none; z-index: 1000; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .maze-container {
+            display: grid;
+            grid-template-columns: repeat(4, 110px);
+            gap: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Grids dos Jogos */
-        .grid-naval { display: grid; gap: 8px; background: #e0f2fe; padding: 15px; border-radius: 15px; margin: 0 auto; width: fit-content; }
-        .casa-naval { width: 45px; height: 45px; background: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1px solid #bae6fd; }
-        .math-hunt-grid { display: grid; grid-template-columns: repeat(6, 50px); gap: 8px; justify-content: center; }
-        .cell-hunt { background: white; border: 2px solid var(--border); border-radius: 8px; height: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-        .cell-hunt.correct { background: var(--success) !important; color: white; }
+        .cell {
+            width: 110px; height: 100px;
+            background: #fff;
+            border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+            border: 3px solid #E2E8F0;
+        }
+
+        /* Cores especiais para Início e Saída */
+        .cell.start-cell { border-color: var(--start-color); background: #EFF6FF; }
+        .cell.end-cell { border-color: var(--end-color); }
+
+        .cell.active { border-color: var(--primary); background: #EEF2FF; }
+        .cell.correct { border-color: var(--success); background: #F0FDF4; }
+
+        input {
+            width: 80%; border: none; background: transparent;
+            text-align: center; font-size: 22px; font-weight: bold; outline: none;
+        }
+
+        .op-tag {
+            position: absolute; background: var(--primary); color: white;
+            padding: 3px 7px; border-radius: 5px; font-size: 11px; font-weight: bold;
+        }
+        .tag-right { top: 50%; right: -35px; transform: translateY(-50%); }
+        .tag-down { bottom: -30px; left: 50%; transform: translateX(-50%); }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; }
+        #victory-msg { margin-top: 20px; font-size: 20px; font-weight: bold; color: var(--success); }
     </style>
 </head>
-<body ng-controller="MainCtrl">
+<body>
 
-<div id="toast" class="toast">👍 Parabéns!</div>
-
-<div class="sidebar">
-    <a href="https://cromosvirtual.com/" class="home-link">
-        <i class="fa-solid fa-house"></i> Voltar ao Início
-    </a>
-
-    <h2>Jogos de Lógica</h2>
-    <div class="nav-item active" onclick="switchTab('tab-naval')"><i class="fa-solid fa-ship"></i> Batalha Naval</div>
-    <div class="nav-item" onclick="switchTab('tab-hunt')"><i class="fa-solid fa-bullseye"></i> Math Hunt</div>
+    <h1>Labirinto Lógico</h1>
     
-    <h2>Matemática Base</h2>
-    <div class="nav-item" onclick="switchTab('tab-algebra')"><i class="fa-solid fa-xmark"></i> Álgebra</div>
-    
-    <div style="margin-top:auto; background: #334155; padding: 15px; border-radius: 12px; text-align: center;">
-        <small style="opacity:0.7">TOTAL DE PONTOS</small><br>
-        <strong style="font-size: 1.4rem; color: var(--accent);">{{ globalScore }}</strong>
-    </div>
-</div>
-
-<div class="main">
-    
-    <div id="tab-naval" class="tab-content active">
-        <div class="card">
-            <h3>Batalha Naval Matemática</h3>
-            <div id="gridNaval" class="grid-naval"></div>
-            <button class="nav-item" style="margin: 20px auto; background: var(--bg); color: var(--text);" onclick="resetNaval()">Resetar Mar</button>
-        </div>
+    <div class="controls">
+        <button class="btn" style="background: #34D399" onclick="initGame('easy')">Fácil</button>
+        <button class="btn" style="background: #EF4444" onclick="initGame('hard')">Difícil</button>
     </div>
 
-    <div id="tab-hunt" class="tab-content">
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>{{ n1 }} + {{ n2 }} = ?</h2>
-                <div style="text-align:right">Tempo: {{ tempo }}s</div>
-            </div>
-            <div class="math-hunt-grid">
-                <div ng-repeat="item in gradeHunt" class="cell-hunt" ng-class="{'correct': item.acertou}" ng-click="verificarHunt(item)">
-                    {{ item.valor }}
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="maze" class="maze-container"></div>
+    <div id="victory-msg"></div>
 
-    <div id="tab-algebra" class="tab-content">
-        <div class="card" style="text-align: center;">
-            <h3>Resolva a Equação</h3>
-            <h1 id="alg-q" style="font-size: 3rem; margin: 30px 0;">2x + 5 = 15</h1>
-            <div id="alg-opts" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
-        </div>
-    </div>
+    <script>
+        const configMaze = [
+            { type: 'start' }, // Quadrado 1: Início
+            { opType: 'right' }, { opType: 'right' }, { opType: 'down' },
+            { opType: 'left' }, { opType: 'left' }, { opType: 'down' },
+            { opType: 'right' }, { type: 'end' } // Quadrado final: Saída
+        ];
 
-</div>
+        let results = [];
 
-<script>
-    // Sistema de Abas
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
+        function initGame(diff) {
+            const maze = document.getElementById('maze');
+            maze.innerHTML = '';
+            document.getElementById('victory-msg').innerText = '';
+            results = [];
 
-    // Feedback Visual
-    function triggerSuccess(pts) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        const t = document.getElementById('toast');
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 2000);
-        
-        // Atualiza score no Angular
-        const scope = angular.element(document.body).scope();
-        scope.$apply(() => scope.globalScore += pts);
-    }
+            let val = (diff === 'hard') ? Math.floor(Math.random() * 40) + 10 : Math.floor(Math.random() * 9) + 2;
+            results.push(val);
 
-    // --- BATALHA NAVAL ---
-    function resetNaval() {
-        const grid = document.getElementById('gridNaval');
-        grid.style.gridTemplateColumns = 'repeat(5, 45px)';
-        grid.innerHTML = '';
-        for(let i=0; i<25; i++) {
-            let div = document.createElement('div');
-            div.className = 'casa-naval';
-            div.innerHTML = '<i class="fa-solid fa-water" style="opacity:0.2"></i>';
-            div.onclick = () => { div.style.background = '#10b981'; div.innerHTML = '🎯'; triggerSuccess(10); };
-            grid.appendChild(div);
+            // Geração da lógica
+            const steps = [];
+            for(let i=0; i < configMaze.length - 1; i++) {
+                let factor = (diff === 'hard') ? Math.floor(Math.random() * 8) + 3 : Math.floor(Math.random() * 5) + 2;
+                let op = (diff === 'hard' && Math.random() > 0.5) ? 'x' : '+';
+                val = (op === 'x') ? val * factor : val + factor;
+                steps.push({ op, factor });
+                results.push(val);
+            }
+
+            // Renderização
+            configMaze.forEach((conf, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                
+                if (i === 0) {
+                    cell.classList.add('start-cell');
+                    cell.innerHTML = `<span class="marker start-text">▶ Início</span><b>${results[0]}</b>`;
+                } else {
+                    const isEnd = (i === configMaze.length - 1);
+                    if(isEnd) {
+                        cell.classList.add('end-cell');
+                        cell.innerHTML = `<span class="marker end-text">🏁 Saída</span>`;
+                    }
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.disabled = true;
+                    input.oninput = (e) => validate(e.target, i);
+                    cell.appendChild(input);
+                }
+
+                if(steps[i]) {
+                    const tag = document.createElement('span');
+                    tag.className = `op-tag ${conf.opType === 'right' ? 'tag-right' : 'tag-down'}`;
+                    tag.innerText = `${steps[i].op} ${steps[i].factor}`;
+                    cell.appendChild(tag);
+                }
+                maze.appendChild(cell);
+            });
+            unlock(1);
         }
-    }
 
-    // --- ÁLGEBRA ---
-    function genAlg() {
-        const x = Math.floor(Math.random()*10)+1;
-        document.getElementById('alg-q').innerText = `3x + 2 = ${3*x+2}`;
-        const opts = [x, x+2, x-1, x+5].sort(()=>Math.random()-0.5);
-        const div = document.getElementById('alg-opts'); div.innerHTML = '';
-        opts.forEach(o => {
-            let b = document.createElement('button');
-            b.style.padding = '15px'; b.innerText = `x = ${o}`;
-            b.onclick = () => { if(o===x) { triggerSuccess(20); genAlg(); } };
-            div.appendChild(b);
-        });
-    }
+        function unlock(idx) {
+            const inputs = document.querySelectorAll('input');
+            const target = inputs[idx-1]; // -1 porque o primeiro quadrado não tem input
+            if(target) {
+                target.disabled = false;
+                target.parentElement.classList.add('active');
+                target.focus();
+            }
+        }
 
-    // --- ANGULAR: MATH HUNT ---
-    angular.module('NeuroApp', []).controller('MainCtrl', function($scope, $interval, $timeout) {
-        $scope.globalScore = 0;
-        $scope.tempo = 90;
-        $scope.gerarHunt = function() {
-            $scope.n1 = Math.floor(Math.random()*10); $scope.n2 = Math.floor(Math.random()*10);
-            $scope.gradeHunt = Array.from({length:36}, () => ({valor: Math.floor(Math.random()*20), acertou: false}));
-            $scope.gradeHunt[Math.floor(Math.random()*36)].valor = $scope.n1 + $scope.n2;
-        };
-        $scope.verificarHunt = function(item) {
-            if(item.valor === ($scope.n1 + $scope.n2)) { item.acertou = true; triggerSuccess(10); $timeout($scope.gerarHunt, 500); }
-        };
-        $interval(() => { if($scope.tempo > 0) $scope.tempo--; }, 1000);
-        $scope.gerarHunt();
-    });
+        function validate(input, idx) {
+            if(parseInt(input.value) === results[idx]) {
+                input.parentElement.classList.replace('active', 'correct');
+                input.disabled = true;
+                if(idx < results.length - 1) unlock(idx + 1);
+                else document.getElementById('victory-msg').innerText = "🏆 PARABÉNS! VOCÊ CHEGOU NA SAÍDA!";
+            }
+        }
 
-    window.onload = () => { resetNaval(); genAlg(); };
-</script>
+        window.onload = () => initGame('easy');
+    </script>
 </body>
 </html>
